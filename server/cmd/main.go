@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
 	"os"
 
@@ -55,20 +54,7 @@ func main() {
 	route.SetupPickRouter(app, db)
 	route.SetupEnvRouter(app, db, sheetService)
 
-	cer, err := tls.LoadX509KeyPair("cert.pem", "key.unencrypted.pem")
-	if err != nil {
-		logrus.Errorf("Не получилось загрузить сертификат: %s.", err)
-		return
-	}
-
-	config := &tls.Config{Certificates: []tls.Certificate{cer}}
-
-	ln, err := tls.Listen("tcp", ":443", config)
-	if err != nil {
-		logrus.Errorf("Listen error: %s.", err)
-	}
-
-	app.Listener(ln)
+	app.ListenTLS(":443", "cert.pem", "key.unencrypted.pem")
 }
 
 func SetupSheetService() *sheets.Service {
