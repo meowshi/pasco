@@ -1,0 +1,63 @@
+services:
+  server:
+    build: ./server
+    ports:
+      - "8000:443"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+
+  client:
+    build: ./client
+    ports:
+      - "5173:443"
+    depends_on:
+      - server
+
+  db:
+    image: postgres:16.0-alpine3.18
+    volumes:
+      - pasco:/var/lib/postgresql
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+
+  adminer:
+    image: adminer
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+
+  migrate:
+    image: migrate/migrate
+    env_file:
+      - .env
+    networks:
+      - new
+    volumes:
+      - ./server/migrations:/migrations
+    command:
+      [
+        "-path",
+        "/migrations",
+        "-database",
+        "$DATABASE_URL",
+        "up"
+      ]
+    depends_on:
+      - db
+networks:
+  new:
+
+
+volumes:
+  pasco:
+    external: true

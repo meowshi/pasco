@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS "env";
+DROP TABLE IF EXISTS "event";
+DROP TABLE IF EXISTS "registration";
+DROP TABLE IF EXISTS "yandexoid";
+DROP TABLE IF EXISTS "pick";
+DROP TABLE IF EXISTS "plus_one_event";
