@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useQuery } from "react-query";
+import { useQuery, useMutation } from "react-query";
 import {
   ToggleButton,
   ToggleButtonGroup,
@@ -20,7 +20,6 @@ let timeoutRunnig = false;
 const Pick = () => {
   const { enqueueSnackbar } = useSnackbar();
 
-  const [key, setKey] = useState("");
   const [autopick, setAutopick] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [pickCardKey, setPickCardKey] = useState(0);
@@ -29,26 +28,17 @@ const Pick = () => {
   const keyInputRef = useRef(null);
 
   const { data: printers } = useQuery(["printers"], getPrinters);
-  const { data: pickInfo, refetch: refetchPick } = useQuery(["pickInfo"], {
-    queryFn: () => {
-      return pick(key);
+  const pickInfoMutation = useMutation({
+    mutationFn: (key) => {
+      return pick(key)
     },
     onError: () => {
       enqueueSnackbar("Ошибка при получении пик-информации.", {
         variant: "error",
       });
     },
-    refetchOnWindowFocus: false,
-    enabled: false,
     retry: 0,
-  });
-
-  useEffect(() => {
-    if (key.length !== 0) {
-      refetchPick();
-      setKey("")
-    }
-  }, [key]);
+  })
 
   return (
     <div className="space-y-10">
@@ -101,7 +91,7 @@ const Pick = () => {
                   timeoutRunnig = false;
                   return;
                 }
-                setKey(k);
+                pickInfoMutation.mutate(k)
                 setInputValue("");
                 setPickCardKey(pickCardKey + 1);
                 timeoutRunnig = false;
@@ -120,11 +110,11 @@ const Pick = () => {
         </div>
       </div>
       <div className="flex justify-center">
-        {(pickInfo !== undefined && pickInfo.data !== null) ? (
+        {(pickInfoMutation.data !== undefined && pickInfoMutation.data.data !== null) ? (
           <PickCard
             key={pickCardKey}
             selectedPrinter={selectedPrinter}
-            pickInfo={pickInfo.data}
+            pickInfo={pickInfoMutation.data.data}
             autopick={autopick}
           />
         ) : null}
