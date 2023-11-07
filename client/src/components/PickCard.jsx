@@ -30,50 +30,64 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
   const [selectedEvent, setSelectedEvent] = useState();
   const [peopleCount, setPeopleCount] = useState(1);
 
-  const listMutation = useMutation({
-    mutationFn: (req) => {
-      return updateRegistration(req, pickInfo.pick_id);
-    },
-  });
-  const giftMutation = useMutation(giveGift);
-  const braceletMutation = useMutation({
-    mutationFn: (req) => {
-      if (req.printer_id === undefined) {
-        enqueueSnackbar("Выбери принтер.", { variant: "error" });
-        throw new Error("Принтер не выбран.");
-      }
+  const markInLists = () => {
+    const event = findEvent(pickInfo.events, selectedEvent);
+    if (event === undefined) {
+      enqueueSnackbar("Выбери событие.", { variant: "error" });
+      throw new Error("Не выбрано событие.");
+    }
 
-      return printBracelet(req, pickInfo.pick_id);
-    },
-  });
-
-  useEffect(() => {
-    if (
-      autopick &&
-      pickInfo.events !== null &&
-      pickInfo.events.length == 1 &&
-      !pickInfo.events[0].allowed_friends
-    ) {
-      listMutation.mutate({
-        event_uuid: pickInfo.events[0].uuid,
+    return updateRegistration(
+      {
+        event_uuid: event.uuid,
         yandexoid_login: pickInfo.login,
         status: peopleCount,
-        status_cell: pickInfo.events[0].status_cell,
-      });
+        status_cell: event.status_cell,
+      },
+      pickInfo.pick_id,
+    );
+  };
+  const printBracelets = () => {
+    const event = findEvent(pickInfo.events, selectedEvent);
+    if (event === undefined) {
+      enqueueSnackbar("Выбери событие.", { variant: "error" });
+      throw new Error("Не выбрано событие.");
+    }
+    if (selectedPrinter === undefined) {
+      enqueueSnackbar("Выбери принтер.", { variant: "error" });
+      throw new Error("Принтер не выбран.");
+    }
 
-      giftMutation.mutate({
-        login: pickInfo.login,
-        key: pickInfo.key,
-        pickId: pickInfo.pick_id,
-      });
-
-      braceletMutation.mutate({
-        event_id: pickInfo.event[0].locker_event_id.toString(),
+    return printBracelet(
+      {
+        event_id: event.locker_event_id.toString(),
         print_count: peopleCount,
         printer_id: selectedPrinter,
-      });
-    }
-  });
+      },
+      pickInfo.pick_id,
+    );
+  };
+
+  const listMutation = useMutation(markInLists);
+  const giftMutation = useMutation(giveGift);
+  const braceletMutation = useMutation(printBracelets);
+
+  // useEffect(() => {
+  //   if (
+  //     autopick &&
+  //     pickInfo.events.length == 1 &&
+  //     !pickInfo.events[0].allowed_friends
+  //   ) {
+  //     selectedEvent = pickInfo.events[0];
+  //     listMutation.mutate();
+  //     giftMutation.mutate({
+  //       login: pickInfo.login,
+  //       key: pickInfo.key,
+  //       pickId: pickInfo.pick_id,
+  //     });
+  //     braceletMutation.mutate();
+  //   }
+  // });
 
   return (
     <div className="rounded-xl bg-zinc-900">
@@ -128,18 +142,7 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
           <ButtonGroup orientation="vertical" variant="contained">
             <Button
               onClick={() => {
-                const event = findEvent(pickInfo.events, selectedEvent);
-                if (event === undefined) {
-                  enqueueSnackbar("Выбери событие.", { variant: "error" });
-                  throw new Error("Не выбрано событие.");
-                }
-
-                listMutation.mutate({
-                  event_uuid: event.uuid,
-                  yandexoid_login: pickInfo.login,
-                  status: peopleCount,
-                  status_cell: event.status_cell,
-                });
+                listMutation.mutate();
               }}
               startIcon={
                 listMutation.isLoading ? (
@@ -177,17 +180,7 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
             </Button>
             <Button
               onClick={() => {
-                const event = findEvent(pickInfo.events, selectedEvent);
-                if (event === undefined) {
-                  enqueueSnackbar("Выбери событие.", { variant: "error" });
-                  throw new Error("Не выбрано событие.");
-                }
-
-                braceletMutation.mutate({
-                  event_id: event.locker_event_id.toString(),
-                  print_count: peopleCount,
-                  printer_id: selectedPrinter,
-                });
+                braceletMutation.mutate();
               }}
               startIcon={
                 braceletMutation.isLoading ? (
@@ -203,19 +196,7 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
             </Button>
             <Button
               onClick={() => {
-                const event = findEvent(pickInfo.events, selectedEvent);
-                if (event === undefined) {
-                  enqueueSnackbar("Выбери событие.", { variant: "error" });
-                  throw new Error("Не выбрано событие.");
-                }
-
-                listMutation.mutate({
-                  event_uuid: event.uuid,
-                  yandexoid_login: pickInfo.login,
-                  status: peopleCount,
-                  status_cell: event.status_cell,
-                });
-
+                listMutation.mutate();
                 if (!giftMutation.isSuccess) {
                   giftMutation.mutate({
                     login: pickInfo.login,
@@ -223,12 +204,7 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
                     pickId: pickInfo.pick_id,
                   });
                 }
-
-                braceletMutation.mutate({
-                  event_id: event.locker_event_id.toString(),
-                  print_count: peopleCount,
-                  printer_id: selectedPrinter,
-                });
+                braceletMutation.mutate();
               }}
             >
               Пик
