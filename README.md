@@ -1,9 +1,21 @@
-# env need to be set
+# Подготовки
 
-## database
+## Env
 
-#### GOOGLE_SPREADSHEET_ID
+### Database
 
-#### GOOGLE_SHEET_ID
+#### GOOGLE_SPREADSHEET_ID - ид гугл таблицы со списками
 
-#### GOOGLE_SHEET_TITLE
+#### GOOGLE_SHEET_ID - ид листа со списками
+
+#### GOOGLE_SHEET_TITLE - title листа со списками
+
+### root
+
+### client
+
+#### VITE_API_URL - url сервера апишки
+
+## Databasea
+
+#### Проверить наличие события "Никакое" c нулевым uuid
