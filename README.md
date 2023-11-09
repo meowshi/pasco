@@ -10,9 +10,9 @@
 
 #### GOOGLE_SHEET_TITLE - title листа со списками
 
-### root
+### Root
 
-### client
+### Client
 
 #### VITE_API_URL - url сервера апишки
 
