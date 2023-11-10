@@ -7,7 +7,7 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@mui/material";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "react-query";
 import CheckCircle from "@mui/icons-material/CheckCircle";
 import Error from "@mui/icons-material/Error";
@@ -54,6 +54,7 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
       pickInfo.events.length == 1 &&
       !pickInfo.events[0].allowed_friends
     ) {
+      console.log("autopick");
       listMutation.mutate({
         event_uuid: pickInfo.events[0].uuid,
         yandexoid_login: pickInfo.login,
@@ -61,19 +62,21 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
         status_cell: pickInfo.events[0].status_cell,
       });
 
-      giftMutation.mutate({
-        login: pickInfo.login,
-        key: pickInfo.key,
-        pickId: pickInfo.pick_id,
-      });
+      if (!giftMutation.isSuccess) {
+        giftMutation.mutate({
+          login: pickInfo.login,
+          key: pickInfo.key,
+          pickId: pickInfo.pick_id,
+        });
+      }
 
       braceletMutation.mutate({
-        event_id: pickInfo.event[0].locker_event_id.toString(),
+        event_id: pickInfo.events[0].locker_event_id.toString(),
         print_count: peopleCount,
         printer_id: selectedPrinter,
       });
     }
-  });
+  }, []);
 
   return (
     <div className="rounded-xl bg-zinc-900">
