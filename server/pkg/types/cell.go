@@ -22,11 +22,36 @@ func NewCellFromString(cell string) Cell {
 	return NewCell(string(cell[0]), row)
 }
 
-func (c *Cell) AddColumn(n byte) *Cell {
-	if c.Column[0] <= 'Z' && c.Column[0]+n >= 'a' || c.Column[0]+n > 'z' {
-		panic("таблица оказалась очень большая я не предусмотрел что колонки заняли столько места. попробуйте перенести таблицу ниже, так чтобы она не заходила за колонку Z")
+func (c *Cell) AddColumn(n int) *Cell {
+	col := []byte(c.Column)
+
+	for {
+		if int(col[len(col)-1])+n <= int('z') {
+			col[len(col)-1] += byte(n)
+			break
+		}
+
+		n = n - int(('z' - col[len(col)-1])) - 1
+		col[len(col)-1] = 'a'
+		if len(col) < 2 {
+			col = append([]byte{'a'}, col...)
+			continue
+		}
+		for i := len(col) - 2; i >= 0; i-- {
+			if col[i]+1 > 'z' {
+				col[i] = 'a'
+				if i == 0 {
+					col = append([]byte{'a'}, col...)
+					break
+				}
+				continue
+			}
+			col[i] += 1
+			break
+		}
 	}
-	c.Column = string(c.Column[0] + n)
+
+	c.Column = string(col)
 	return c
 }
 
