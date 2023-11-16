@@ -55,6 +55,11 @@ func (s *pickPostgresStorage) CreatePick(req *domain.CreatePickReq) (int64, erro
 		return 0, err
 	}
 
+	err = rows.Close()
+	if err != nil {
+		return 0, err
+	}
+
 	return id, nil
 }
 

@@ -164,8 +164,14 @@ func (s *postgresEventStorage) CheckPlusOneEvent(name string) (bool, error) {
 		return false, err
 	}
 	exists := false
+
 	row.Next()
 	row.Scan(&exists)
+
+	err = row.Close()
+	if err != nil {
+		return false, err
+	}
 
 	return exists, nil
 }
