@@ -9,6 +9,7 @@ services:
       - db
     volumes:
       - /etc/localtime:/etc/localtime:ro
+    restart: on-failure
 
   client:
     build: ./client
