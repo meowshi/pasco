@@ -10,6 +10,7 @@ import (
 	"github.com/meowshi/pasco-server/pkg/domain"
 	"github.com/meowshi/pasco-server/pkg/storage"
 	"github.com/meowshi/pasco-server/pkg/types"
+	"github.com/meowshi/pasco-server/pkg/utils"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/api/sheets/v4"
 )
@@ -83,13 +84,14 @@ func (u *eventUsecase) Create(eventTitleGoogleSheetCell string) error {
 
 	values := res.Values
 	if len(values[0][0].(string)) == 0 || len(values) < 2 {
-		return errors.New("Размер полученный данных из список меньше необходимого, видимо, ячейка указана неверно или списки дефектные.")
+		return errors.New("hазмер полученный данных из список меньше необходимого, видимо, ячейка указана неверно или списки дефектные")
 	}
 
 	eventName := values[0][0].(string)
+	cuttedEventName := utils.CutEventName(eventName)
 
 	startCell := types.NewCellFromString(eventTitleGoogleSheetCell)
-	isInPlusOne, _ := u.eventStorage.CheckPlusOneEvent(eventName)
+	isInPlusOne, _ := u.eventStorage.CheckPlusOneEvent(cuttedEventName)
 
 	event := &domain.Event{
 		Uuid:            uuid.New(),
@@ -106,7 +108,7 @@ func (u *eventUsecase) Create(eventTitleGoogleSheetCell string) error {
 	startCell.AddRow(1).AddColumn(3)
 	people := values[1:]
 	for _, val := range people {
-		if len(val) < 3 || haveEmpty(val) {
+		if len(val) < 3 || utils.HaveEmpty(val) {
 			break
 		}
 
@@ -156,15 +158,6 @@ func (u *eventUsecase) Create(eventTitleGoogleSheetCell string) error {
 	return nil
 }
 
-func haveEmpty(slice []interface{}) bool {
-	for _, el := range slice {
-		if len(el.(string)) == 0 {
-			return true
-		}
-	}
-	return false
-}
-
 func (u *eventUsecase) Delete(eventUuid uuid.UUID) error {
 	err := u.eventStorage.Delete(eventUuid)
 
@@ -192,10 +185,11 @@ func (u *eventUsecase) Update(event *domain.Event) error {
 		return err
 	}
 
+	cuttedEventName := utils.CutEventName(event.Name)
 	if event.AllowedFriends {
-		u.eventStorage.CreatePlusOneEvent(event.Name)
+		u.eventStorage.CreatePlusOneEvent(cuttedEventName)
 	} else {
-		u.eventStorage.DeletePlusOneEvent(event.Name)
+		u.eventStorage.DeletePlusOneEvent(cuttedEventName)
 	}
 
 	return nil
