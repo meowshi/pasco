@@ -41,7 +41,7 @@ func (s *postgresEventStorage) Create(event *domain.Event) error {
 
 	rowsAffected, _ := result.RowsAffected()
 	if rowsAffected == 0 {
-		err = errors.New("DB: event already exists.")
+		err = errors.New("DB: event already exists")
 		logrus.Errorf("Ошибка при создании события: %s.", err)
 		return err
 	}
@@ -163,15 +163,12 @@ func (s *postgresEventStorage) CheckPlusOneEvent(name string) (bool, error) {
 		logrus.Errorf("Ошибка при проверке существования события+1: %s.", err)
 		return false, err
 	}
+	defer row.Close()
+
 	exists := false
 
 	row.Next()
 	row.Scan(&exists)
-
-	err = row.Close()
-	if err != nil {
-		return false, err
-	}
 
 	return exists, nil
 }

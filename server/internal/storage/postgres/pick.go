@@ -47,16 +47,12 @@ func (s *pickPostgresStorage) CreatePick(req *domain.CreatePickReq) (int64, erro
 		logrus.Errorf("Ошибка при создании пика: %s.", err)
 		return 0, err
 	}
+	defer rows.Close()
 
 	rows.Next()
 	err = rows.Scan(&id)
 	if err != nil {
 		logrus.Errorf("Ошибка при сканировании возвращенного pick id: %s.", err)
-		return 0, err
-	}
-
-	err = rows.Close()
-	if err != nil {
 		return 0, err
 	}
 

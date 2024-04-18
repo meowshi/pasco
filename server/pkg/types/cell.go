@@ -32,7 +32,6 @@ func (c *Cell) AddColumn(n int) *Cell {
 		}
 
 		n = n - int(('z' - col[len(col)-1])) - 1
-		col[len(col)-1] = 'a'
 		if len(col) < 2 {
 			col = append([]byte{'a'}, col...)
 			continue
