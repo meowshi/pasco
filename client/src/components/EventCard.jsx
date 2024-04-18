@@ -112,6 +112,7 @@ const EventCard = ({ props, refetch }) => {
                   <TableCell>Login</TableCell>
                   <TableCell>Name</TableCell>
                   <TableCell>Surname</TableCell>
+                  <TableCell>Friends</TableCell>
                   <TableCell>Status</TableCell>
                 </TableRow>
               </TableHead>
@@ -121,6 +122,7 @@ const EventCard = ({ props, refetch }) => {
                     <TableCell>{entry.login}</TableCell>
                     <TableCell>{entry.name}</TableCell>
                     <TableCell>{entry.surname}</TableCell>
+                    <TableCell>{entry.friends}</TableCell>
                     <TableCell>{entry.status}</TableCell>
                   </TableRow>
                 ))}

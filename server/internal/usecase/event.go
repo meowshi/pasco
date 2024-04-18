@@ -73,7 +73,7 @@ func (u *eventUsecase) Create(eventTitleGoogleSheetCell string) error {
 	}
 
 	cell := types.NewCellFromString(eventTitleGoogleSheetCell)
-	rng := fmt.Sprintf("%s!%s:%s", sheetTitle.Value, cell.ToString(), cell.AddColumn(3).Column)
+	rng := fmt.Sprintf("%s!%s:%s", sheetTitle.Value, cell.ToString(), cell.AddColumn(4).Column)
 
 	res, err := u.service.Spreadsheets.Values.Get(spreadsheetId.Value, rng).Do()
 	if err != nil {
@@ -83,7 +83,7 @@ func (u *eventUsecase) Create(eventTitleGoogleSheetCell string) error {
 
 	values := res.Values
 	if len(values[0][0].(string)) == 0 || len(values) < 2 {
-		return errors.New("Размер полученный данных из список меньше необходимого, видимо, ячейка указана неверно или списки дефектные.")
+		return errors.New("размер полученный данных из список меньше необходимого, видимо, ячейка указана неверно или списки дефектные")
 	}
 
 	eventName := values[0][0].(string)
@@ -103,19 +103,26 @@ func (u *eventUsecase) Create(eventTitleGoogleSheetCell string) error {
 	yandexoids := make([]*domain.Yandexoid, 0)
 	registrations := make([]*domain.Registration, 0)
 
-	startCell.AddRow(1).AddColumn(3)
-	people := values[1:]
+	// тут мы переделываем потому что колонка статуса съезжает на один вправо и пропускает ряд с названиями колонок
+	// startCell.AddRow(1).AddColumn(3)
+	startCell.AddRow(2).AddColumn(4)
+	people := values[2:]
 	for _, val := range people {
-		if len(val) < 3 || haveEmpty(val) {
+		if len(val) < 4 || haveEmpty(val) {
 			break
 		}
 
 		var status int
 		statusCell := startCell.ToString()
-		if len(val) == 4 {
-			status, _ = strconv.Atoi(val[3].(string))
+		if len(val) == 5 {
+			status, _ = strconv.Atoi(val[4].(string))
 		} else {
 			status = 0
+		}
+
+		friends, err := strconv.Atoi(val[3].(string))
+		if err != nil {
+			friends = 0
 		}
 
 		yandexoid := &domain.Yandexoid{
@@ -128,6 +135,7 @@ func (u *eventUsecase) Create(eventTitleGoogleSheetCell string) error {
 		registrations = append(registrations, &domain.Registration{
 			EventUuid:      event.Uuid,
 			YandexoidLogin: yandexoid.Login,
+			Friends:        friends,
 			Status:         status,
 			StatusCell:     statusCell,
 		})

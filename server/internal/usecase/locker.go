@@ -3,7 +3,6 @@ package usecase
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -79,7 +78,7 @@ func (u *lockerUsecase) PrintBracelet(printReq *domain.PrintBraceletReq) error {
 	}
 	defer res.Body.Close()
 	if res.StatusCode != 200 {
-		err = errors.New(fmt.Sprintf("Status code is not OK. %s", res.Status))
+		err = fmt.Errorf("status code is not OK. %s", res.Status)
 		logrus.Errorf("Ошибка при выполнении запроса на печать браслетов: %s.", err)
 		return err
 	}
@@ -103,7 +102,7 @@ func (u *lockerUsecase) GetPrinters() ([]*domain.Printer, error) {
 	}
 	defer res.Body.Close()
 	if res.StatusCode != fiber.StatusOK {
-		err = errors.New(fmt.Sprintf("Status code is not OK. %s", res.Status))
+		err = fmt.Errorf("status code is not OK. %s", res.Status)
 		logrus.Errorf("Ошибка при выполнении запроса на получение принтеров: %s.", err)
 		return nil, err
 	}

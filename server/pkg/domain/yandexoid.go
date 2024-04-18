@@ -15,5 +15,7 @@ type YandexoidRegs struct {
 
 type EventWithYandexoidStatusCell struct {
 	*Event
+	Friends    int    `json:"friends" db:"friends"`
+	Status     int    `json:"status" db:"status"`
 	StatusCell string `db:"status_cell" json:"status_cell"`
 }

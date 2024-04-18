@@ -57,7 +57,7 @@ func (s *yandexoidPostgresStorage) GetEventsByDate(yandexoidLogin string, date t
 	var events []*domain.EventWithYandexoidStatusCell
 
 	err := s.db.Select(&events,
-		`SELECT event.*, registration.status_cell FROM event
+		`SELECT event.*, registration.friends, registration.status, registration.status_cell FROM event
 		JOIN registration ON event.uuid=registration.event_uuid
 		WHERE registration.yandexoid_login=$1 AND date_trunc('day', event.created_at::timestamptz)=date_trunc('day', $2::timestamptz)
 		ORDER BY event.name`,
@@ -76,7 +76,7 @@ func (s *yandexoidPostgresStorage) GetEvents(yandexoidLogin string) ([]*domain.E
 	var events []*domain.EventWithYandexoidStatusCell
 
 	err := s.db.Select(&events,
-		`SELECT event.* registration.status_cell FROM event
+		`SELECT event.*, registration.friends, registration.status_cell FROM event
 		JOIN registration ON event.uuid=registration.event_uuid
 		WHERE registration.yandexoid_login=$1
 		ORDER BY event.name

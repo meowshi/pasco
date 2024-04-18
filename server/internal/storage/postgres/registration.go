@@ -19,7 +19,7 @@ func NewRegistrationPostgresStorage(db *sqlx.DB) *registrationPostgresStorage {
 func (s *registrationPostgresStorage) Create(registration *domain.Registration) error {
 	_, err := s.db.NamedExec(`
 		INSERT INTO registration
-		VALUES (:event_uuid, :yandexoid_login, :status, :status_cell)
+		VALUES (:event_uuid, :yandexoid_login, :friends, :status, :status_cell)
 		ON CONFLICT(event_uuid, yandexoid_login)
 		DO NOTHING`,
 		registration,
@@ -30,8 +30,8 @@ func (s *registrationPostgresStorage) Create(registration *domain.Registration) 
 
 func (s *registrationPostgresStorage) CreateMultiple(registrations ...*domain.Registration) error {
 	_, err := s.db.NamedExec(`
-		INSERT INTO registration (event_uuid, yandexoid_login, status, status_cell)
-		VALUES (:event_uuid, :yandexoid_login, :status, :status_cell)`,
+		INSERT INTO registration (event_uuid, yandexoid_login, friends, status, status_cell)
+		VALUES (:event_uuid, :yandexoid_login, :friends, :status, :status_cell)`,
 		registrations,
 	)
 

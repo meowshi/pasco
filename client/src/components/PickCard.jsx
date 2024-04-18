@@ -4,6 +4,7 @@ import {
   ToggleButtonGroup,
   Button,
   CircularProgress,
+  TextField,
   Checkbox,
   FormControlLabel,
 } from "@mui/material";
@@ -27,6 +28,8 @@ function findEvent(events, uuid) {
 export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
   const { enqueueSnackbar } = useSnackbar();
 
+  const [friends, setFriends] = useState(0);
+
   const [selectedEvent, setSelectedEvent] = useState();
   const [peopleCount, setPeopleCount] = useState(1);
 
@@ -48,6 +51,10 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
   });
 
   useEffect(() => {
+    if (pickInfo.events !== null && pickInfo.events.length > 0) {
+      setSelectedEvent(pickInfo.events[0].uuid)
+      setFriends(pickInfo.events[0].friends)
+    }
     if (
       autopick &&
       pickInfo.events !== null &&
@@ -58,7 +65,8 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
       listMutation.mutate({
         event_uuid: pickInfo.events[0].uuid,
         yandexoid_login: pickInfo.login,
-        status: peopleCount,
+        friends: friends,
+        status: friends + 1,
         status_cell: pickInfo.events[0].status_cell,
       });
 
@@ -72,11 +80,12 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
 
       braceletMutation.mutate({
         event_id: pickInfo.events[0].locker_event_id.toString(),
-        print_count: peopleCount,
+        print_count: friends + 1,
         printer_id: selectedPrinter,
       });
     }
   }, []);
+
 
   return (
     <div className="rounded-xl bg-zinc-900">
@@ -86,6 +95,14 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
             <div className="bold text-orange-200">{pickInfo.login}</div>
             <div>{pickInfo.name}</div>
             <div>{pickInfo.surname}</div>
+            {selectedEvent !== undefined &&
+            findEvent(pickInfo.events, selectedEvent).friends > 0 ? (
+              <div flex items-center className="text-green-600">
+                <PersonAddAlt1Icon />
+                {" "}
+                {findEvent(pickInfo.events, selectedEvent).friends}
+              </div>
+            ) : null}
           </div>
           <div>
             <ToggleButtonGroup
@@ -94,6 +111,7 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
               value={selectedEvent}
               onChange={(e) => {
                 setSelectedEvent(e.target.value);
+                setFriends(findEvent(pickInfo.events, e.target.value).friends)
                 setPeopleCount(1);
               }}
             >
@@ -104,25 +122,46 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
                   </ToggleButton>
                 ))
               ) : (
-                <div className="text-lg text-red-500">
+                <div className="text-lg text-red-600">
                   Яндексоид никуда не записан!
                 </div>
               )}
             </ToggleButtonGroup>
           </div>
+          {selectedEvent !== undefined && findEvent(pickInfo.events, selectedEvent).status !== 0 ?
+            <div className="text-lg text-red-600">{"Проход был! ("+findEvent(pickInfo.events, selectedEvent).status + " человек/а)"}</div>
+            : null
+          }
         </div>
         {selectedEvent !== undefined &&
         findEvent(pickInfo.events, selectedEvent).allowed_friends ? (
           <FormControlLabel
             control={
-              <div>
-                <Checkbox
+              <div className="flex items-center space-x-2">
+                {/* <Checkbox
                   checked={!(peopleCount === 1)}
                   onClick={(e) => {
                     e.target.checked ? setPeopleCount(2) : setPeopleCount(1);
                   }}
-                />
+                /> */}
                 <PersonAddAlt1Icon />
+                <TextField
+                  value={friends}
+                  size="small"
+                  style = {{width: 50}}
+                  onChange={(e) => {
+                    let v = Number(e.target.value)
+                    if (isNaN(v)) {
+                      setFriends(0)
+                      return
+                    }
+                    if (v >= 100) {
+                      setFriends(99)
+                      return
+                    }
+                    setFriends(v)
+                  }}
+                />
               </div>
             }
           />
@@ -140,7 +179,8 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
                 listMutation.mutate({
                   event_uuid: event.uuid,
                   yandexoid_login: pickInfo.login,
-                  status: peopleCount,
+                  friends: friends,
+                  status: friends + 1,
                   status_cell: event.status_cell,
                 });
               }}
@@ -188,7 +228,7 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
 
                 braceletMutation.mutate({
                   event_id: event.locker_event_id.toString(),
-                  print_count: peopleCount,
+                  print_count: friends + 1,
                   printer_id: selectedPrinter,
                 });
               }}
@@ -215,7 +255,8 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
                 listMutation.mutate({
                   event_uuid: event.uuid,
                   yandexoid_login: pickInfo.login,
-                  status: peopleCount,
+                  friends: friends,
+                  status: friends + 1,
                   status_cell: event.status_cell,
                 });
 
@@ -229,7 +270,7 @@ export const PickCard = ({ pickInfo, selectedPrinter, autopick }) => {
 
                 braceletMutation.mutate({
                   event_id: event.locker_event_id.toString(),
-                  print_count: peopleCount,
+                  print_count: friends + 1,
                   printer_id: selectedPrinter,
                 });
               }}

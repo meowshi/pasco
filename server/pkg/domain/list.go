@@ -2,5 +2,6 @@ package domain
 
 type ListEntry struct {
 	Yandexoid
-	Status string `db:"status" json:"status"`
+	Friends int    `json:"friends" db:"friends"`
+	Status  string `db:"status" json:"status"`
 }

@@ -45,6 +45,7 @@ CREATE TABLE "public"."plus_one_event" (
 CREATE TABLE "public"."registration" (
     "event_uuid" uuid NOT NULL,
     "yandexoid_login" text NOT NULL,
+    "friends" integer NOT NULL,
     "status" smallint NOT NULL,
     "status_cell" text NOT NULL,
     CONSTRAINT "registration_event_uuid_yandexoid_login" PRIMARY KEY ("event_uuid", "yandexoid_login")

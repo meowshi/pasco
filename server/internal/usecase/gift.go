@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -43,7 +42,7 @@ func (u *giftUsecase) Get(key string) (*domain.GetRes, error) {
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		err = errors.New(fmt.Sprintf("HTTP response status - %s", res.Status))
+		err = fmt.Errorf("HTTP response status - %s", res.Status)
 		logrus.Errorf("Gift auth response status code != 200: %s", err)
 		return nil, err
 	}
@@ -87,7 +86,7 @@ func (u *giftUsecase) Give(key, login, count string) error {
 	defer res.Body.Close()
 
 	if res.StatusCode != 200 {
-		err = errors.New(fmt.Sprintf("Http response status - %s", res.Status))
+		err = fmt.Errorf("http response status - %s", res.Status)
 		logrus.Errorf("Gift collect response status code != 200: %s.", err)
 		return err
 	}

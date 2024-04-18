@@ -110,7 +110,7 @@ func (s *postgresEventStorage) GetEventLists(eventUuid uuid.UUID) ([]*domain.Lis
 	var list []*domain.ListEntry
 
 	err := s.db.Select(&list,
-		`SELECT yandexoid.*, registration.status
+		`SELECT yandexoid.*, registration.friends, registration.status
 		FROM registration
 		JOIN yandexoid ON registration.yandexoid_login=yandexoid.login
 		WHERE registration.event_uuid=$1
