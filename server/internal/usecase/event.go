@@ -102,8 +102,13 @@ func (u *eventUsecase) Create(eventTitleGoogleSheetCell string) error {
 		AllowedFriends:  isInPlusOne,
 	}
 
-	yandexoids := make([]*domain.Yandexoid, 0)
-	registrations := make([]*domain.Registration, 0)
+	// yandexoids := make([]*domain.Yandexoid, 0)
+	// registrations := make([]*domain.Registration, 0)
+	err = u.eventStorage.Create(event)
+	if err != nil {
+		logrus.Errorf("Ошибка при создании события в БД: %s.", err)
+		return err
+	}
 
 	// тут мы переделываем потому что колонка статуса съезжает на один вправо и пропускает ряд с названиями колонок
 	// startCell.AddRow(1).AddColumn(3)
@@ -132,36 +137,45 @@ func (u *eventUsecase) Create(eventTitleGoogleSheetCell string) error {
 			Name:    val[1].(string),
 			Surname: val[2].(string),
 		}
-		yandexoids = append(yandexoids, yandexoid)
+		// yandexoids = append(yandexoids, yandexoid)
 
-		registrations = append(registrations, &domain.Registration{
+		// registrations = append(registrations, &domain.Registration{
+		// 	EventUuid:      event.Uuid,
+		// 	YandexoidLogin: yandexoid.Login,
+		// 	Friends:        friends,
+		// 	Status:         status,
+		// 	StatusCell:     statusCell,
+		// })
+		err = u.yandexoidStorage.Create(yandexoid)
+		if err != nil {
+			// logrus.Errorf("create yand err: %s", err)
+		}
+
+		err = u.registrationStorage.Create(&domain.Registration{
 			EventUuid:      event.Uuid,
 			YandexoidLogin: yandexoid.Login,
 			Friends:        friends,
 			Status:         status,
 			StatusCell:     statusCell,
 		})
+		if err != nil {
+			logrus.Errorf("create reg err: %s", err)
+		}
 
 		startCell.AddRow(1)
 	}
 
-	err = u.eventStorage.Create(event)
-	if err != nil {
-		logrus.Errorf("Ошибка при создании события в БД: %s.", err)
-		return err
-	}
+	// err = u.yandexoidStorage.CreateMultiple(yandexoids...)
+	// if err != nil {
+	// 	logrus.Errorf("Ошибка при создании яндексоидов в БД: %s.", err)
+	// 	return err
+	// }
 
-	err = u.yandexoidStorage.CreateMultiple(yandexoids...)
-	if err != nil {
-		logrus.Errorf("Ошибка при создании яндексоидов в БД: %s.", err)
-		return err
-	}
-
-	err = u.registrationStorage.CreateMultiple(registrations...)
-	if err != nil {
-		logrus.Errorf("Ошибка при создании регистраций в БД: %s.", err)
-		return err
-	}
+	// err = u.registrationStorage.CreateMultiple(registrations...)
+	// if err != nil {
+	// 	logrus.Errorf("Ошибка при создании регистраций в БД: %s.", err)
+	// 	return err
+	// }
 
 	return nil
 }

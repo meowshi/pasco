@@ -56,13 +56,13 @@ func (c *YandexoidController) GetPickInfo(ctx *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "'key' is not set")
 	}
 
-	// login, err := c.giftUsecase.Get(key)
-	// if err != nil {
-	// 	return fiber.NewError(fiber.StatusInternalServerError, err.Error())
-	// }
-	login := &domain.GetRes{
-		LuckyLogin: "meowshi",
+	login, err := c.giftUsecase.Get(key)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, err.Error())
 	}
+	// login := &domain.GetRes{
+	// 	LuckyLogin: "meowshi",
+	// }
 
 	yandexoid, err := c.yandexoidUsecase.Get(login.LuckyLogin)
 	if err != nil {

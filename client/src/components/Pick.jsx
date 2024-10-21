@@ -33,7 +33,7 @@ const Pick = () => {
       return pick(key)
     },
     onError: () => {
-      enqueueSnackbar("Ошибка при получении пик-информации.", {
+      enqueueSnackbar("Не удалось найти яндексоида в подарках.", {
         variant: "error",
       });
     },
@@ -77,12 +77,12 @@ const Pick = () => {
               timeoutRunnig = true;
 
               setTimeout(() => {
-                if (keyInputRef.current.value.length < 8) {
-                  enqueueSnackbar("Неверный rfid.", { variant: "error" });
-                  setInputValue("");
-                  timeoutRunnig = false;
-                  return;
-                }
+                // if (keyInputRef.current.value.length < 6) {
+                //   enqueueSnackbar("Неверный rfid.", { variant: "error" });
+                //   setInputValue("");
+                //   timeoutRunnig = false;
+                //   return;
+                // }
 
                 const k = rfidToKey(keyInputRef.current.value);
                 if (k.length === 0 || k === undefined) {
