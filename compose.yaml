@@ -6,7 +6,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - /etc/localtime:/etc/localtime:ro
     restart: on-failure
@@ -33,6 +34,11 @@ services:
       - pasco
     env_file:
       - .env
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "pasco" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   adminer:
     image: adminer
@@ -43,7 +49,8 @@ services:
     networks:
       - pasco
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   migrate:
     image: migrate/migrate
@@ -53,20 +60,14 @@ services:
       - pasco
     volumes:
       - ./server/migrations:/migrations
-    command:
-      [
-        "-path",
-        "/migrations",
-        "-database",
-        "$DATABASE_URL",
-        "up"
-      ]
+    command: [ "-path", "/migrations", "-database", "$DATABASE_URL", "up" ]
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
 networks:
   pasco:
 
 
 volumes:
   pasco:
-    external: true
