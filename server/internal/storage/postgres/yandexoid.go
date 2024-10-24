@@ -19,7 +19,13 @@ func NewYandexoidPostgresStorage(db *sqlx.DB) *yandexoidPostgresStorage {
 }
 
 func (s *yandexoidPostgresStorage) Create(yandexoid *domain.Yandexoid) error {
-	_, err := s.db.NamedExec("INSERT INTO yandexoid VALUES (:login, :name, :surname)", yandexoid)
+	_, err := s.db.NamedExec(`
+		INSERT INTO yandexoid
+		VALUES (:login, :name, :surname)
+		ON CONFLICT (login)
+		DO UPDATE
+		SET name=excluded.name, surname=excluded.surname`,
+		yandexoid)
 
 	return err
 }
